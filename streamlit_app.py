@@ -10,7 +10,7 @@ from streamlit_agraph import TripleStore
 
 
 # App title
-st.title("🎈 Home/Office Wi-Fi AI Cyberdefender")
+st.title("🎈 Home Wi-Fi AI Cyberdefender")
 
 # App description
 st.write(
@@ -19,14 +19,14 @@ st.write(
 
 # Path to the CSV file
 csv_file_path = 'dataset/ssid_distribution.csv'
-csv1_file_path = 'dataset/mac_address_traffic.csv'
+#csv1_file_path = 'dataset/mac_address_traffic.csv'
+csv1_file_path = 'dataset/processed_data.csv'
 
 # Check if the file exists
 if os.path.exists(csv_file_path):
     # Read the data from the CSV file
     df = pd.read_csv(csv_file_path)
-
-    
+ 
 
     # Check if the file has the required columns
     if 'SSID' in df.columns and 'Count' in df.columns:
@@ -47,3 +47,37 @@ else:
     st.error("File ssid_distribution.csv not found in the dataset directory.")
 
 
+# Check if the CSV file exists and load data
+if pd.io.common.file_exists(csv1_file_path):
+    # Load data from CSV file
+    df = pd.read_csv(csv1_file_path)
+
+    
+    # Define the function to visualize anomalies
+    def visualize_anomalies(df):
+        if df.empty:
+            st.write("No data to visualize.")
+            return
+        
+        # Create the scatter plot
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        # Distribution of packet lengths
+        normal = df[df['Anomaly'] == 'Normal']
+        anomaly = df[df['Anomaly'] == 'Anomaly']
+        
+        ax.scatter(normal.index, normal['Length'], label='Normal', color='blue', alpha=0.5, s=10)
+        ax.scatter(anomaly.index, anomaly['Length'], label='Anomaly', color='red', alpha=0.5, s=10)
+        
+        ax.set_xlabel('Packet Index')
+        ax.set_ylabel('Packet Length')
+        ax.set_title('Anomaly Detection in Packet Length Across All Files')
+        ax.legend()
+        
+        # Show the plot
+        st.pyplot(fig)
+    
+    # Visualize anomalies
+    visualize_anomalies(df)
+else:
+    st.error("File processed_data.csv not found in the dataset folder.")
